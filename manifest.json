@@ -1,0 +1,10 @@
+{
+  "name": "Weekly Money Planner",
+  "short_name": "Money Planner",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "description": "Combined household budget app with fortnightly pay cycle tracking.",
+  "icons": []
+}

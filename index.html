@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>Weekly Money Planner</title>
+  <link rel="manifest" href="manifest.json" />
+  <style>
+    :root{
+      --bg:#020617; --bg2:#0f172a; --card:rgba(255,255,255,0.06); --cardBorder:rgba(255,255,255,0.12);
+      --text:#f8fafc; --muted:#94a3b8; --accent:#38bdf8; --accent2:#22c55e; --danger:#ef4444; --input:#0f172a;
+      --shadow:0 16px 40px rgba(0,0,0,.25);
+    }
+    body.light{
+      --bg:#e2e8f0; --bg2:#f8fafc; --card:rgba(255,255,255,0.92); --cardBorder:rgba(15,23,42,0.08);
+      --text:#0f172a; --muted:#475569; --accent:#0ea5e9; --accent2:#16a34a; --danger:#dc2626; --input:#ffffff;
+      --shadow:0 12px 32px rgba(15,23,42,.08);
+    }
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,var(--bg),var(--bg2));color:var(--text);min-height:100vh}
+    .wrap{max-width:1100px;margin:0 auto;padding:14px}.grid{display:grid;gap:14px}.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .card{background:var(--card);border:1px solid var(--cardBorder);border-radius:28px;box-shadow:var(--shadow);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+    .hero{padding:18px;border-radius:32px;background:linear-gradient(135deg,#111827,#0f172a);border:1px solid rgba(255,255,255,.1);box-shadow:0 18px 40px rgba(0,0,0,.28)}
+    .hero-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.brand{display:flex;gap:14px;align-items:center;min-width:0}
+    .logo-box,.logo-preview{width:62px;height:62px;border-radius:18px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;overflow:hidden;flex:0 0 auto}
+    .logo-preview img{width:100%;height:100%;object-fit:cover;background:#fff}.kicker{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:#cbd5e1}
+    .title-input{margin-top:8px;width:100%;border:none;outline:none;background:rgba(255,255,255,.1);color:#fff;padding:12px 14px;border-radius:16px;font-size:20px;font-weight:700}
+    .subtitle{margin:8px 0 0;color:#cbd5e1;font-size:14px}.hero-actions{display:flex;flex-direction:column;gap:8px}
+    .btn,.file-btn{border:none;outline:none;cursor:pointer;border-radius:16px;padding:12px 14px;font-weight:600;background:rgba(255,255,255,.1);color:#fff;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+    .btn.primary{background:var(--accent);color:white}.btn.danger{background:var(--danger);color:white}.hidden{display:none}
+    .card h2{margin:0;font-size:20px}.section{padding:18px}.label{display:block;font-size:13px;color:var(--muted);margin:0 0 8px}
+    input[type="text"],input[type="number"],input[type="date"],select{width:100%;background:var(--input);color:var(--text);border:1px solid var(--cardBorder);border-radius:16px;padding:12px 14px;font-size:16px;outline:none}
+    .muted{color:var(--muted)} .big{font-size:30px;font-weight:800;margin-top:8px}.pillbox{padding:14px;border-radius:22px;background:rgba(255,255,255,.04);border:1px solid var(--cardBorder)}
+    .stats .card{padding:18px}.small{font-size:13px}.bill{padding:14px;border-radius:24px;border:1px solid var(--cardBorder);background:rgba(255,255,255,.04)}
+    .bill-grid{display:grid;gap:10px;grid-template-columns:2.2fr 1fr 1fr 1fr 1fr auto;align-items:end}.bill-foot{margin-top:10px;font-size:13px;color:var(--muted)}
+    .top-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.progress{width:100%;height:12px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden}
+    .progress > div{height:100%;border-radius:999px;background:currentColor}.row{display:flex;justify-content:space-between;gap:10px;align-items:center}.stack{display:grid;gap:12px}
+    .cat-item,.day-item,.pay-item{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 14px;border-radius:18px;border:1px solid var(--cardBorder);background:rgba(255,255,255,.04)}
+    .cat-left{display:flex;align-items:center;gap:10px}.icon{width:36px;height:36px;border-radius:12px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:18px}
+    .snapshot{display:flex;gap:12px;align-items:flex-start}.snapshot .heart{font-size:22px;margin-top:2px}.footer-note{margin-top:10px;font-size:13px;color:var(--muted)} .spacer{height:2px}
+    .inline-grid{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr))}
+    .install-tip{margin-top:10px;padding:12px 14px;border-radius:16px;border:1px solid var(--cardBorder);color:var(--muted);font-size:13px}
+    @media (max-width: 900px){
+      .grid-2,.grid-4,.inline-grid{grid-template-columns:1fr}.bill-grid{grid-template-columns:1fr 1fr}.bill-grid .full{grid-column:1/-1}
+      .hero-top{flex-direction:column}.hero-actions{width:100%;flex-direction:row;flex-wrap:wrap}.hero-actions .btn,.hero-actions .file-btn{flex:1}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <div class="hero-top">
+        <div class="brand">
+          <div id="logoBox" class="logo-box">📱</div>
+          <div style="min-width:0;flex:1">
+            <div class="kicker">Budget App</div>
+            <input id="appName" class="title-input" type="text" value="Weekly Money Planner" />
+            <div class="subtitle">Combined household budget with fortnightly pay-cycle tracking.</div>
+          </div>
+        </div>
+        <div class="hero-actions">
+          <label class="file-btn" for="logoUpload">Add Logo</label>
+          <input id="logoUpload" type="file" accept="image/*" class="hidden" />
+          <button id="installBtn" class="btn primary hidden">Install App</button>
+          <button id="themeToggle" class="btn">Light</button>
+          <button id="resetBtn" class="btn danger">Reset</button>
+        </div>
+      </div>
+      <div class="install-tip">Once uploaded to Netlify, open the site on your phone and use Install App or Add to Home Screen.</div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="grid grid-2">
+      <div class="card section">
+        <h2>Income & Pay Cycle</h2>
+        <div style="height:12px"></div>
+        <div class="inline-grid">
+          <div>
+            <label class="label">Latest pay amount</label>
+            <input id="income" type="number" min="0" placeholder="0" />
+          </div>
+          <div>
+            <label class="label">Paid</label>
+            <select id="incomeFrequency">
+              <option value="weekly">Weekly</option>
+              <option value="fortnightly" selected>Fortnightly</option>
+            </select>
+          </div>
+        </div>
+        <div style="height:12px"></div>
+        <div class="inline-grid">
+          <div>
+            <label class="label">Budget using</label>
+            <select id="payMode">
+              <option value="average">Rolling average</option>
+              <option value="latest">Latest pay</option>
+              <option value="expected">Expected pay</option>
+            </select>
+          </div>
+          <div>
+            <label class="label">Average window</label>
+            <select id="averageWindow">
+              <option value="2">Last 2 pays</option>
+              <option value="3" selected>Last 3 pays</option>
+              <option value="4">Last 4 pays</option>
+              <option value="6">Last 6 pays</option>
+            </select>
+          </div>
+        </div>
+        <div style="height:12px"></div>
+        <div class="inline-grid">
+          <div>
+            <label class="label">Expected pay</label>
+            <input id="expectedPay" type="number" min="0" placeholder="0" />
+          </div>
+          <div>
+            <label class="label">Next pay date</label>
+            <input id="nextPayDate" type="date" />
+          </div>
+        </div>
+        <div style="height:12px"></div>
+        <div class="top-row" style="margin-bottom:8px">
+          <label class="label" style="margin:0">Recent pay amounts</label>
+          <button id="addPayBtn" class="btn primary" type="button">Add Pay</button>
+        </div>
+        <div id="payHistory" class="stack"></div>
+        <div style="height:12px"></div>
+        <div class="pillbox">
+          <div class="small muted">Average weekly income used in budget</div>
+          <div id="incomeDisplay" class="big">$0.00</div>
+          <div id="cycleSummary" class="small muted" style="margin-top:8px"></div>
+        </div>
+      </div>
+
+      <div class="card section">
+        <h2>Weekly Targets</h2>
+        <div style="height:12px"></div>
+        <label class="label">Weekly savings target</label>
+        <input id="savings" type="number" min="0" placeholder="0" />
+        <div style="height:12px"></div>
+        <label class="label">Weekly enjoyment / fun money target</label>
+        <input id="fun" type="number" min="0" placeholder="0" />
+        <div style="height:12px"></div>
+        <div class="small muted">Targets stay weekly even if you are paid fortnightly, so daily spending stays accurate.</div>
+      </div>
+    </div>
+
+    <div style="height:14px"></div>
+
+    <div class="card section">
+      <div class="top-row">
+        <h2>Bills & Expenses</h2>
+        <button id="addBillBtn" class="btn primary">Add Bill</button>
+      </div>
+      <div id="billsList" class="stack"></div>
+    </div>
+
+    <div style="height:14px"></div>
+
+    <div class="grid grid-4 stats">
+      <div class="card"><div class="small muted">Average weekly income</div><div id="statIncome" class="big">$0.00</div></div>
+      <div class="card"><div class="small muted">Weekly bills</div><div id="statBills" class="big">$0.00</div></div>
+      <div class="card"><div class="small muted">Left after bills</div><div id="statLeft" class="big">$0.00</div></div>
+      <div class="card"><div class="small muted">Safe daily spending</div><div id="statDaily" class="big">$0.00</div></div>
+    </div>
+
+    <div style="height:14px"></div>
+
+    <div class="card section">
+      <h2>Fortnight Pay Cycle Tracker</h2>
+      <div style="height:12px"></div>
+      <div class="grid grid-2">
+        <div class="pillbox">
+          <div class="small muted">Days until next pay</div>
+          <div id="daysUntilPay" class="big">$0.00</div>
+        </div>
+        <div class="pillbox">
+          <div class="small muted">Safe spend until payday</div>
+          <div id="untilPaySpend" class="big">$0.00</div>
+        </div>
+      </div>
+      <div id="payTrackerNote" class="footer-note"></div>
+    </div>
+
+    <div style="height:14px"></div>
+
+    <div class="card section">
+      <h2>Budget Split</h2>
+      <div style="height:12px"></div>
+      <div class="stack">
+        <div>
+          <div class="row small"><span>Bills</span><span id="billsValue">$0.00</span></div>
+          <div class="progress" style="color:var(--accent)"><div id="billsBar" style="width:0%"></div></div>
+        </div>
+        <div>
+          <div class="row small"><span>Targets</span><span id="targetsValue">$0.00</span></div>
+          <div class="progress" style="color:#a78bfa"><div id="targetsBar" style="width:0%"></div></div>
+        </div>
+        <div>
+          <div class="row small"><span>Available to spend</span><span id="spendValue">$0.00</span></div>
+          <div class="progress" style="color:var(--accent2)"><div id="spendBar" style="width:0%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:14px"></div>
+
+    <div class="grid grid-2">
+      <div class="card section">
+        <h2>Category Totals</h2>
+        <div style="height:12px"></div>
+        <div id="categoryTotals" class="stack"></div>
+      </div>
+
+      <div class="card section">
+        <h2>Bill Due View</h2>
+        <div style="height:12px"></div>
+        <div id="dueView" class="stack"></div>
+      </div>
+    </div>
+
+    <div style="height:14px"></div>
+
+    <div class="card section">
+      <div class="snapshot">
+        <div class="heart">❤️</div>
+        <div>
+          <h2 style="margin-bottom:8px">Joint Money Snapshot</h2>
+          <div id="snapshotText" style="line-height:1.6"></div>
+          <div class="footer-note">Your budget automatically saves on this device.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "weekly-money-planner-pwa-v2";
+    const frequencies = { weekly:1, fortnightly:1/2, monthly:12/52, quarterly:4/52, yearly:1/52 };
+    const categories = [
+      { value:"home", label:"Home", icon:"🏠" }, { value:"car", label:"Car", icon:"🚗" }, { value:"utilities", label:"Utilities", icon:"💡" },
+      { value:"subscriptions", label:"Subscriptions", icon:"📺" }, { value:"kids", label:"Kids", icon:"🧒" }, { value:"insurance", label:"Insurance", icon:"🛡️" },
+      { value:"education", label:"Education", icon:"🎓" }, { value:"debt", label:"Debt", icon:"🏦" }, { value:"other", label:"Other", icon:"🧾" }
+    ];
+    const weekDays = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+    const defaultState = {
+      appName:"Weekly Money Planner", income:"", incomeFrequency:"fortnightly", payMode:"average", averageWindow:"3", expectedPay:"", nextPayDate:"",
+      savings:"", fun:"", darkMode:true, logo:"",
+      incomeHistory:[""],
+      bills:[
+        { id: Date.now()+1, name:"Rent / Mortgage", amount:"", frequency:"weekly", category:"home", dueDay:"Monday" },
+        { id: Date.now()+2, name:"Electricity", amount:"", frequency:"monthly", category:"utilities", dueDay:"Friday" },
+        { id: Date.now()+3, name:"Internet", amount:"", frequency:"monthly", category:"utilities", dueDay:"Wednesday" }
+      ],
+    };
+
+    let state = loadState();
+    let deferredPrompt = null;
+
+    const $ = (id) => document.getElementById(id);
+    const appName = $("appName"), income = $("income"), incomeFrequency = $("incomeFrequency"), payMode = $("payMode"),
+          averageWindow = $("averageWindow"), expectedPay = $("expectedPay"), nextPayDate = $("nextPayDate"),
+          savings = $("savings"), fun = $("fun"), billsList = $("billsList"), addBillBtn = $("addBillBtn"),
+          logoUpload = $("logoUpload"), logoBox = $("logoBox"), themeToggle = $("themeToggle"), resetBtn = $("resetBtn"),
+          addPayBtn = $("addPayBtn"), payHistory = $("payHistory"), installBtn = $("installBtn");
+
+    function loadState(){ try{ const raw = localStorage.getItem(STORAGE_KEY); return raw ? {...structuredClone(defaultState), ...JSON.parse(raw)} : structuredClone(defaultState);}catch{ return structuredClone(defaultState);} }
+    function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    function fmt(n){ const value = Number.isFinite(n) ? n : 0; return new Intl.NumberFormat("en-AU",{style:"currency",currency:"AUD",maximumFractionDigits:2}).format(value); }
+    function num(v){ const n = parseFloat(v); return Number.isFinite(n) ? n : 0; }
+    function getCategoryMeta(value){ return categories.find(c => c.value === value) || categories[categories.length - 1]; }
+    function weeklyEquivalent(bill){ return num(bill.amount) * (frequencies[bill.frequency] || 0); }
+    function escapeHtml(str){ return String(str).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;"); }
+    function cap(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+
+    function renderLogo(){
+      if(state.logo){ logoBox.className = "logo-preview"; logoBox.innerHTML = '<img alt="Logo" src="' + state.logo + '">'; }
+      else { logoBox.className = "logo-box"; logoBox.textContent = "📱"; }
+    }
+
+    function recentValidPays(){
+      const limit = Math.max(1, num(state.averageWindow) || 3);
+      return state.incomeHistory.map(num).filter(v => v > 0).slice(-limit);
+    }
+
+    function selectedCycleIncome(){
+      if(state.payMode === "expected") return num(state.expectedPay);
+      if(state.payMode === "latest") return num(state.income || state.incomeHistory[state.incomeHistory.length - 1] || 0);
+      const vals = recentValidPays();
+      if(!vals.length) return num(state.income);
+      return vals.reduce((a,b)=>a+b,0) / vals.length;
+    }
+
+    function weeklyIncomeValue(){
+      const cycle = selectedCycleIncome();
+      return state.incomeFrequency === "weekly" ? cycle : cycle / 2;
+    }
+
+    function totals(){
+      const weeklyIncome = weeklyIncomeValue();
+      const weeklyBills = state.bills.reduce((sum, bill) => sum + weeklyEquivalent(bill), 0);
+      const targets = num(state.savings) + num(state.fun);
+      const leftAfterBills = weeklyIncome - weeklyBills;
+      const leftAfterTargets = leftAfterBills - targets;
+      const daily = leftAfterTargets / 7;
+      return { weeklyIncome, weeklyBills, targets, leftAfterBills, leftAfterTargets, daily };
+    }
+
+    function daysUntilNextPay(){
+      if(!state.nextPayDate) return null;
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const payDate = new Date(state.nextPayDate + "T00:00:00");
+      const diff = Math.ceil((payDate - today) / 86400000);
+      return diff;
+    }
+
+    function renderPayHistory(){
+      payHistory.innerHTML = "";
+      state.incomeHistory.forEach((entry, idx) => {
+        const row = document.createElement("div");
+        row.className = "pay-item";
+        row.innerHTML = `
+          <div style="flex:1">
+            <div class="small muted" style="margin-bottom:6px">Pay ${idx + 1}</div>
+            <input type="number" min="0" value="${escapeHtml(entry || "")}" placeholder="0">
+          </div>
+          <button class="btn danger" type="button">Delete</button>
+        `;
+        const input = row.querySelector("input");
+        const del = row.querySelector("button");
+        input.addEventListener("input", (e) => {
+          state.incomeHistory[idx] = e.target.value;
+          if(idx === state.incomeHistory.length - 1){ state.income = e.target.value; income.value = state.income; }
+          saveState();
+          renderStats();
+          renderPayTracker();
+        });
+        del.addEventListener("click", () => {
+          state.incomeHistory.splice(idx, 1);
+          if(!state.incomeHistory.length) state.incomeHistory = [""];
+          state.income = state.incomeHistory[state.incomeHistory.length - 1] || "";
+          saveState();
+          render();
+        });
+        payHistory.appendChild(row);
+      });
+    }
+
+    function billTemplate(bill){
+      const freqOptions = Object.keys(frequencies).map(f => `<option value="${f}" ${bill.frequency===f?'selected':''}>${cap(f)}</option>`).join("");
+      const catOptions = categories.map(c => `<option value="${c.value}" ${bill.category===c.value?'selected':''}>${c.label}</option>`).join("");
+      const dayOptions = weekDays.map(d => `<option value="${d}" ${bill.dueDay===d?'selected':''}>${d}</option>`).join("");
+      return `
+        <div class="bill">
+          <div class="bill-grid">
+            <div class="full">
+              <label class="label">Bill name</label>
+              <input type="text" data-field="name" value="${escapeHtml(bill.name || "")}" placeholder="e.g. Rego, Phone, Rent">
+            </div>
+            <div>
+              <label class="label">Amount</label>
+              <input type="number" min="0" data-field="amount" value="${escapeHtml(bill.amount || "")}" placeholder="0">
+            </div>
+            <div>
+              <label class="label">Frequency</label>
+              <select data-field="frequency">${freqOptions}</select>
+            </div>
+            <div>
+              <label class="label">Category</label>
+              <select data-field="category">${catOptions}</select>
+            </div>
+            <div>
+              <label class="label">Due</label>
+              <select data-field="dueDay">${dayOptions}</select>
+            </div>
+            <div>
+              <label class="label">&nbsp;</label>
+              <button class="btn danger delete-bill">Delete</button>
+            </div>
+          </div>
+          <div class="bill-foot">Weekly equivalent: <strong>${fmt(weeklyEquivalent(bill))}</strong></div>
+        </div>
+      `;
+    }
+
+    function renderBills(){
+      billsList.innerHTML = "";
+      state.bills.forEach((bill, idx) => {
+        const wrap = document.createElement("div");
+        wrap.innerHTML = billTemplate(bill);
+        const root = wrap.firstElementChild;
+        root.querySelectorAll("[data-field]").forEach(el => {
+          const handler = (e) => {
+            state.bills[idx][e.target.dataset.field] = e.target.value;
+            saveState();
+            if (e.target.tagName === "SELECT") {
+              render();
+            } else {
+              const foot = root.querySelector(".bill-foot strong");
+              if (foot) foot.textContent = fmt(weeklyEquivalent(state.bills[idx]));
+              renderStats();
+              renderCategories();
+              renderDueView();
+              renderPayTracker();
+            }
+          };
+          if (el.tagName === "SELECT") el.addEventListener("change", handler);
+          else el.addEventListener("input", handler);
+        });
+        root.querySelector(".delete-bill").addEventListener("click", () => {
+          state.bills.splice(idx, 1);
+          saveState();
+          render();
+        });
+        billsList.appendChild(root);
+      });
+    }
+
+    function renderStats(){
+      const t = totals();
+      $("incomeDisplay").textContent = fmt(t.weeklyIncome);
+      $("statIncome").textContent = fmt(t.weeklyIncome);
+      $("statBills").textContent = fmt(t.weeklyBills);
+      $("statLeft").textContent = fmt(t.leftAfterBills);
+      $("statDaily").textContent = fmt(t.daily);
+      $("billsValue").textContent = fmt(t.weeklyBills);
+      $("targetsValue").textContent = fmt(t.targets);
+      $("spendValue").textContent = fmt(Math.max(t.leftAfterTargets, 0));
+
+      const billsPct = t.weeklyIncome > 0 ? Math.min((t.weeklyBills / t.weeklyIncome) * 100, 100) : 0;
+      const targetsPct = t.weeklyIncome > 0 ? Math.min((t.targets / t.weeklyIncome) * 100, 100) : 0;
+      const spendPct = t.weeklyIncome > 0 ? Math.min((Math.max(t.leftAfterTargets, 0) / t.weeklyIncome) * 100, 100) : 0;
+      $("billsBar").style.width = billsPct + "%";
+      $("targetsBar").style.width = targetsPct + "%";
+      $("spendBar").style.width = spendPct + "%";
+
+      const modeText = state.payMode === "average" ? `rolling average of last ${state.averageWindow} pays` : state.payMode === "latest" ? "latest pay" : "expected pay";
+      $("cycleSummary").textContent = `Using ${modeText}${state.nextPayDate ? " • Next pay: " + state.nextPayDate : ""}`;
+      $("snapshotText").innerHTML = `Based on your ${escapeHtml(state.incomeFrequency)} pay and selected budget mode, you have <strong>${fmt(t.leftAfterTargets)}</strong> left each week after bills, savings, and fun money, which gives you about <strong>${fmt(t.daily)}</strong> per day for regular spending.`;
+    }
+
+    function renderPayTracker(){
+      const t = totals();
+      const days = daysUntilNextPay();
+      if(days === null){
+        $("daysUntilPay").textContent = "—";
+        $("untilPaySpend").textContent = "—";
+        $("payTrackerNote").textContent = "Add your next pay date to see how much is safe to spend until payday.";
+        return;
+      }
+      $("daysUntilPay").textContent = String(days);
+      const untilPay = t.daily * Math.max(days, 0);
+      $("untilPaySpend").textContent = fmt(untilPay);
+      if(days < 0) $("payTrackerNote").textContent = "Your next pay date is in the past. Update it to keep the tracker accurate.";
+      else if(days === 0) $("payTrackerNote").textContent = "Payday is today.";
+      else $("payTrackerNote").textContent = `At your current budget, that is what you can safely spend over the next ${days} day${days === 1 ? "" : "s"}.`;
+    }
+
+    function renderCategories(){
+      const holder = $("categoryTotals"); holder.innerHTML = "";
+      const map = {};
+      state.bills.forEach(b => { const v = weeklyEquivalent(b); map[b.category] = (map[b.category] || 0) + v; });
+      const entries = Object.entries(map).sort((a,b) => b[1]-a[1]);
+      if(!entries.length){ holder.innerHTML = `<div class="muted small">No bill totals yet.</div>`; return; }
+      entries.forEach(([cat,total]) => {
+        const meta = getCategoryMeta(cat);
+        const div = document.createElement("div");
+        div.className = "cat-item";
+        div.innerHTML = `<div class="cat-left"><div class="icon">${meta.icon}</div><div>${meta.label}</div></div><strong>${fmt(total)}</strong>`;
+        holder.appendChild(div);
+      });
+    }
+
+    function renderDueView(){
+      const holder = $("dueView"); holder.innerHTML = "";
+      weekDays.forEach(day => {
+        const items = state.bills.filter(b => b.dueDay === day && num(b.amount) > 0);
+        const total = items.reduce((sum,b) => sum + weeklyEquivalent(b), 0);
+        const div = document.createElement("div");
+        div.className = "day-item"; div.style.alignItems = "flex-start";
+        div.innerHTML = `<div><div style="font-weight:700">${day}</div><div class="small muted" style="margin-top:6px">${items.length ? items.map(i => escapeHtml(i.name || "Untitled bill")).join(", ") : "No bills due"}</div></div><strong>${fmt(total)}</strong>`;
+        holder.appendChild(div);
+      });
+    }
+
+    function applyTheme(){ document.body.classList.toggle("light", !state.darkMode); themeToggle.textContent = state.darkMode ? "Light" : "Dark"; }
+    function render(){
+      appName.value = state.appName; income.value = state.income; incomeFrequency.value = state.incomeFrequency; payMode.value = state.payMode;
+      averageWindow.value = state.averageWindow; expectedPay.value = state.expectedPay; nextPayDate.value = state.nextPayDate; savings.value = state.savings; fun.value = state.fun;
+      renderLogo(); applyTheme(); renderPayHistory(); renderBills(); renderStats(); renderPayTracker(); renderCategories(); renderDueView();
+    }
+
+    appName.addEventListener("input", e => { state.appName = e.target.value; saveState(); });
+    income.addEventListener("input", e => { state.income = e.target.value; if(state.incomeHistory.length) state.incomeHistory[state.incomeHistory.length - 1] = e.target.value; saveState(); renderStats(); renderPayTracker(); renderPayHistory(); });
+    incomeFrequency.addEventListener("change", e => { state.incomeFrequency = e.target.value; saveState(); renderStats(); renderPayTracker(); });
+    payMode.addEventListener("change", e => { state.payMode = e.target.value; saveState(); renderStats(); renderPayTracker(); });
+    averageWindow.addEventListener("change", e => { state.averageWindow = e.target.value; saveState(); renderStats(); renderPayTracker(); });
+    expectedPay.addEventListener("input", e => { state.expectedPay = e.target.value; saveState(); renderStats(); renderPayTracker(); });
+    nextPayDate.addEventListener("change", e => { state.nextPayDate = e.target.value; saveState(); renderStats(); renderPayTracker(); });
+    savings.addEventListener("input", e => { state.savings = e.target.value; saveState(); renderStats(); renderPayTracker(); });
+    fun.addEventListener("input", e => { state.fun = e.target.value; saveState(); renderStats(); renderPayTracker(); });
+    addPayBtn.addEventListener("click", () => { state.incomeHistory.push(""); saveState(); renderPayHistory(); });
+    addBillBtn.addEventListener("click", () => {
+      state.bills.push({ id:Date.now(), name:"", amount:"", frequency:"weekly", category:"other", dueDay:"Monday" });
+      saveState(); render();
+    });
+    logoUpload.addEventListener("change", e => {
+      const file = e.target.files && e.target.files[0]; if(!file) return;
+      const reader = new FileReader();
+      reader.onload = () => { state.logo = reader.result; saveState(); renderLogo(); };
+      reader.readAsDataURL(file);
+    });
+    themeToggle.addEventListener("click", () => { state.darkMode = !state.darkMode; saveState(); applyTheme(); });
+    resetBtn.addEventListener("click", () => {
+      if(!confirm("Reset the whole budget app on this device?")) return;
+      state = structuredClone(defaultState); saveState(); render();
+    });
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.classList.remove("hidden");
+    });
+
+    installBtn.addEventListener("click", async () => {
+      if(!deferredPrompt) return;
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      installBtn.classList.add("hidden");
+    });
+
+    if("serviceWorker" in navigator){
+      window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(console.error));
+    }
+
+    render();
+  </script>
+</body>
+</html>
